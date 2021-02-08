@@ -8,10 +8,10 @@ we need to configure our command prompt to show us square texts or else
 *__open command prompt__
 *__right click on top and goto defaults__(as shown below)
 ![right_click_image](/images/click.png)
-Format: ![Alt Text](url)
+
 *__goto fonts and select _Raster Fonts_ and of font size 8*8 and save it__ (as shown below)(take a note of your previous settings cause its highly probabable that ypu wont like this font)
 ![fontsize](/images/size.png)
-Format: ![Alt Text](url)
+
 
 install the software by using
 __python -m pip install asciigraphics__
