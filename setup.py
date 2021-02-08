@@ -16,4 +16,9 @@ setup(
   install_requires = [
     "cursor~=1.3",
   ],
+  extras_require = {
+    "dev": [
+      "pytest>=3.7",
+    ]
+  },
   )
