@@ -27,6 +27,7 @@ import the 2d graphics and animation module by using the command
  
 >after importing we need to create a canvas to work on to do that
 >>__a.createcanvas(_width_,_height_)__
+
 (note that asciianim is imported as a and width and height are any positive
 integers best results are produced when range of them is in between 50 to 200)
 now you can use any of the follwing ways to draw on this 2d space
