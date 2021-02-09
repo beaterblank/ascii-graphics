@@ -17,7 +17,7 @@ we need to configure our command prompt to show us square texts or else
 
 install the software by using
 
-__python -m pip install asciigraphics__
+__python -m pip install asciigraphics__(i didnot publish this yet after publishing this command will work)
 
 import the 2d graphics and animation module by using the command
 
