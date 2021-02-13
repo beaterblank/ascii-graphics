@@ -47,28 +47,20 @@ now you can use any of the follwing ways to draw on this 2d space
 >as u u go father away the less visible ascii charecter will be printed at that place
 eg
 
->>a.line_2d(10,15,50,50)
-
 ![line](images/line_2d.png)
 
 ## __a.rect_2d(x,y,w,h,[z],[key])__ 
 >u can draw a rectangle on 3d space on plane z here z=0 by default also key can be used as mentioned above
-
->>a.rect_2d(10,15,50,50)
 
 ![rect](images/rect.png)
 
 ## __a.ellipse_2d(rx, ry, xc, yc,[z],[key])__
 >u can draw an ellipse at _xc,yc_ and with _rx,ry_ axis lengths _note for a circle rx = ry_ z and key work as mentioned above
 
->>a.ellipse_2d(10,15,50,50)
-
 ![ellipse](images/ellipse.png)
 
 ## __a.arc(x,y,r,a,z=0,key=True)__ 
 >u can make an arc with center at _x,y_ and with radius _r_ and for angle a z and key work as mentioned above
-
->>a.arc(50,50,20,2)
 
 ![arc](images/arc.png)
 
@@ -76,3 +68,8 @@ eg
 >flood fills from the co-ordinates given and z represents the the plane its filling in it can be used to manipulate the transpiracy the higher the z the father away the plane will be as less traspirent the fill will be
 
 ![floodfill](images/floodfill.png)
+
+## __a.text(x,y,string)__
+>places the text at the specified location
+
+![text](images/text.png)
