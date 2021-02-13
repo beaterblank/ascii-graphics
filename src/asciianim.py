@@ -21,10 +21,12 @@ import os
 import math
 import cursor
 
-#a function to clear screen after every frame using lambda to map cls from os into clear
+
+sys.setrecursionlimit(100*100)
+
+#a function to clear output after every frame using lambda to map cls from os into clear
 clear = lambda:os.system('cls')
 clear()
-
 #chars array raging from least visible to most visible parts
 chars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI:,\"^`'. "
 char = list(chars)
@@ -44,7 +46,7 @@ def createcanvas(width,height):
         for j in range(rows): 
             col.append(" ") 
         output.append(col)
-    #clearing whatever is on the screen 
+    #clearing whatever is on the output 
     clear()
 
 
@@ -103,7 +105,7 @@ def rect_2d(x1,y1,width,height,z=0,key=True):
 
 #----------------------------------------------------------------------#        
 #function to draw the ellipse by midpoint algorithim       
-def ellipse_2d(rx, ry, xc, yc,z=0,key=True):  
+def ellipse_2d(xc, yc,rx, ry,z=0,key=True):  
     points=[]
     x = 0 
     y = ry  
@@ -265,15 +267,79 @@ def test():
     print("working")
 
 #----------------------------------------------------------------------#
+
 #----------------------------------------------------------------------#
 #----------------------------flood fill--------------------------------#
-def floodfill(x,y,z=0):
-    if(output[y][x]==" "):
-        pointat(x,y,z)
-        floodfill(x+1,y,z)
-        floodfill(x-1,y,z)
-        floodfill(x,y+1,z)
-        floodfill(x,y-1,z)
+#----------------------------------------------------------------------#
+def isValid(m, n, x, y, prevC, newC): 
+    if (x<0 or x>= n or y<0 or y>= m or output[x][y]!= prevC or output[x][y]== newC): 
+        return False
+    return True
+
+def floodFill(xx, yy,newc=0): 
+    queue = []
+    x = yy
+    y = xx
+    m = height()
+    n = width()
+    prevC = " "
+    newC = char[newc] 
+    # Append the position of starting  
+    # pixel of the component 
+    queue.append([x, y]) 
+    # Color the pixel with the new color 
+    output[x][y] = newC 
+    # While the queue is not empty i.e. the  
+    # whole component having prevC color  
+    # is not colored with newC color 
+    while queue: 
+        # Dequeue the front node 
+        currPixel = queue.pop() 
+        posX = currPixel[0] 
+        posY = currPixel[1] 
+        # Check if the adjacent 
+        # pixels are valid 
+        if isValid(m, n,posX + 1, posY,   prevC, newC): 
+            # Color with newC 
+            # if valid and enqueue 
+            output[posX + 1][posY] = newC 
+            queue.append([posX + 1, posY]) 
+        if isValid(m, n,posX-1, posY,prevC, newC): 
+            output[posX-1][posY]= newC 
+            queue.append([posX-1, posY]) 
+        if isValid(m, n,posX, posY + 1,prevC, newC): 
+            output[posX][posY + 1]= newC 
+            queue.append([posX, posY + 1]) 
+        if isValid(m, n,posX, posY-1,prevC, newC): 
+            output[posX][posY-1]= newC 
+            queue.append([posX, posY-1]) 
+
+def fill(x,y,z=0,key=True):
+    floodFill(x,y,z)
+    if(key):
+        draw()
+#----------------------------------------------------------------------#
+
+#----------------------------------------------------------------------#
+#----------------------------------text--------------------------------#
+#----------------------------------------------------------------------#
+
+def char_at(x,y,char):
+    if(y>=0 and x>=0 and x<len(output[0]) and y<len(output)):
+        output[y][x] = char
+
+def text(x,y,string,key=True):
+    for char in string:
+        if(x>width()):
+            y+=1
+            x=0
+        char_at(x,y,char)
+        x+=1
+    if(key):
+        draw()
+#----------------------------------------------------------------------#
+#----------------------------------------------------------------------#
+
 #----------------------------------------------------------------------#
 #----------------------------------end---------------------------------#
 #----------------------------------------------------------------------#
