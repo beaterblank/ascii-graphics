@@ -71,3 +71,8 @@ eg
 >>a.arc(50,50,20,2)
 
 ![arc](images/arc.png)
+
+## __a.fill(x,y,z)__
+>flood fills from the co-ordinates given and z represents the the plane its filling in it can be used to manipulate the transpiracy the higher the z the father away the plane will be as less traspirent the fill will be
+
+![floodfill](images/floodfill.png)
