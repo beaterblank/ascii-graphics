@@ -1,4 +1,4 @@
 import asciianim as a
 a.createcanvas(100,100)
-a.text(40,40,"my name is blankbeater")
+a.line_2d(10,10,80,40)
 input()
