@@ -14,8 +14,9 @@ setup(
   long_description = long_description,
   long_description_content_type = "text/markdown",
   install_requires = [
-    "cursor~=1.3",
+    "cursor",
     "pyautogui",
+    "keyboard",
   ],
   extras_require = {
     "dev": [

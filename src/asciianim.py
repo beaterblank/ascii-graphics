@@ -21,7 +21,7 @@ import os
 import math
 import cursor
 import pyautogui
-
+import keyboard
 sys.setrecursionlimit(100*100)
 
 #a function to clear output after every frame using lambda to map cls from os into clear
@@ -35,11 +35,11 @@ output=[]
 
 #function to create a canvas
 def createcanvas(width,height):
-    cursor.hide() 
     #seting the size of command prompt
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
     #making it full screen
     pyautogui.press("f11")
+    cursor.hide() 
     #instantiating the 2d matrix
     rows, cols = (width, int(height))
     for i in range(cols): 
