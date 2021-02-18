@@ -15,6 +15,7 @@ setup(
   long_description_content_type = "text/markdown",
   install_requires = [
     "cursor~=1.3",
+    "pyautogui",
   ],
   extras_require = {
     "dev": [

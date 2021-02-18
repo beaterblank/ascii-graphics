@@ -20,17 +20,16 @@ import sys
 import os
 import math
 import cursor
-
+import pyautogui
 
 sys.setrecursionlimit(100*100)
 
 #a function to clear output after every frame using lambda to map cls from os into clear
 clear = lambda:os.system('cls')
-clear()
+
 #chars array raging from least visible to most visible parts
 chars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI:,\"^`'. "
 char = list(chars)
-
 #initializing output varible
 output=[]
 
@@ -39,6 +38,8 @@ def createcanvas(width,height):
     cursor.hide() 
     #seting the size of command prompt
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
+    #making it full screen
+    pyautogui.press("f11")
     #instantiating the 2d matrix
     rows, cols = (width, int(height))
     for i in range(cols): 
@@ -48,10 +49,6 @@ def createcanvas(width,height):
         output.append(col)
     #clearing whatever is on the output 
     clear()
-
-
-
-
     
 #----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
