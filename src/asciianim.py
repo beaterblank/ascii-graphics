@@ -220,14 +220,14 @@ def extract():
 
 #----------------------------------------------------------------------#
 #function to scale the the interface
-def scale_2d(s,k=True,intensity=0):
+def scale_2d(s,key=True,intensity=0):
     points = extract()
     clearbg()
     for i in points:
         nx = i[0]*s
         ny = i[1]*s
         pointat(round(nx),round(ny),intensity)
-    if(k):
+    if(key):
         draw()
 #----------------------------------------------------------------------#
 
