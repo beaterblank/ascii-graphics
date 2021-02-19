@@ -78,7 +78,6 @@ def createcanvas(width,height):
     mat[2][2] = far/(far-near)  
     mat[3][2] = -far*near/(far-near)
     mat[2][3] = 1.0
-    mat[3][3] = 0.0
     
 #----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
@@ -372,7 +371,7 @@ def text(x,y,string,key=True):
 #we calculate intensity   
 
 import math
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass
 
 @dataclass
 class vector3d:
@@ -384,6 +383,16 @@ class vector3d:
 class intvector2d:
     x:int
     y:int
+
+@dataclass
+class triangle:
+    a:vector3d
+    b:vector3d
+    c:vector3d
+
+@dataclass
+class mesh:
+    k:list[triangle]
 
 def filledtriangle(a,b,c,intensity,key=False):
     line_2d(a.x,a.y,b.x,b.y,intensity,False)
