@@ -32,6 +32,18 @@ chars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI:,\"^`'. 
 char = list(chars)
 #initializing output varible
 output=[]
+#making a projection matrix
+mat=[]
+
+#----------------------------------------------------------------------#
+#functions to return window width and height
+def width():
+    return len(output)
+def height():
+    return len(output[0])
+def aspect():
+    return height()/width()
+#----------------------------------------------------------------------#
 
 #function to create a canvas
 def createcanvas(width,height):
@@ -49,6 +61,24 @@ def createcanvas(width,height):
         output.append(col)
     #clearing whatever is on the output 
     clear()
+
+    #3d###
+    for i in range(4): 
+        col = [] 
+        for j in range(4): 
+            col.append(0.0) 
+        mat.append(col)
+    near = 0.1
+    far = 1000
+    fov = 90
+    aspectratio = aspect()
+    fovrad = 1/math.tan(fov*0.5/180*math.pi)
+    mat[0][0] = aspectratio*fovrad
+    mat[1][1] = fovrad
+    mat[2][2] = far/(far-near)  
+    mat[3][2] = -far*near/(far-near)
+    mat[2][3] = 1.0
+    mat[3][3] = 0.0
     
 #----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
@@ -80,7 +110,7 @@ def line_2d(x1,y1,x2,y2,intensity=0,key=True):
     Xinc = dx/steps
     Yinc = dy/steps
     #increasing that much every steps for all the steps
-    for i in range(steps):
+    for i in range(steps+1):
         pointat(round(x),round(y),intensity)
         x = x+Xinc
         y = y+Yinc
@@ -94,7 +124,7 @@ def line_2d(x1,y1,x2,y2,intensity=0,key=True):
 def rect_2d(x1,y1,width,height,intensity=0,key=True):
     line_2d(x1,y1,x1+width,y1,intensity,False)
     line_2d(x1,y1,x1,y1+height,intensity,False)
-    line_2d(x1+width,y1,x1+width,y1+height+1,intensity,False)
+    line_2d(x1+width,y1,x1+width,y1+height,intensity,False)
     line_2d(x1,y1+height,x1+width,y1+height,intensity,False)
     if(key):
         draw()
@@ -187,13 +217,7 @@ def draw():
         k+=1
 #----------------------------------------------------------------------#
 
-#----------------------------------------------------------------------#
-#functions to return window width and height
-def width():
-    return len(output)
-def height():
-    return len(output[0])
-#----------------------------------------------------------------------#
+
 
 #----------------------------------------------------------------------#
 #a function to clearbg which simply puts blanks into all of the 2d list
@@ -337,3 +361,46 @@ def text(x,y,string,key=True):
 #----------------------------------------------------------------------#
 #----------------------------------end---------------------------------#
 #----------------------------------------------------------------------#
+
+
+
+#----------------------------------------------------------------------#
+#-----------------------------3d start---------------------------------#
+#----------------------------------------------------------------------#
+
+#we render 3d objects by meshes meshes are just collection of triangles in 3d space projected on to a 2d plane
+#we calculate intensity   
+
+import math
+from dataclasses import dataclass, is_dataclass
+
+@dataclass
+class vector3d:
+    x:float
+    y:float
+    z:float
+
+@dataclass
+class intvector2d:
+    x:int
+    y:int
+
+def filledtriangle(a,b,c,intensity,key=False):
+    line_2d(a.x,a.y,b.x,b.y,intensity,False)
+    line_2d(b.x,b.y,c.x,c.y,intensity,False)
+    line_2d(a.x,a.y,c.x,c.y,intensity,False)
+    centeroid = intvector2d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3))
+    fill(centeroid.x,centeroid.y,intensity,False)
+    if(key):
+        draw()
+
+def mulvecmat(i,m):
+    o = vector3d(0,0,0)
+    o.x = i.x*m[0][0]+i.y*m[1][0]+i.z*m[2][0]+m[3][0]
+    o.y = i.x*m[0][1]+i.y*m[1][1]+i.z*m[2][0]+m[3][1]
+    o.z = i.x*m[0][2]+i.y*m[1][2]+i.z*m[2][0]+m[3][2]
+    w   = i.x*m[0][3]+i.y*m[1][3]+i.z*m[2][0]+m[3][3]
+    if(w!=0):
+        o.x = o.x/w
+        o.y = o.y/w
+        o.z = o.z/w
