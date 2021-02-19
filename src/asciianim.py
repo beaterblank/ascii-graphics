@@ -22,7 +22,7 @@ import math
 import cursor
 import pyautogui
 import keyboard
-sys.setrecursionlimit(100*100)
+sys.setrecursionlimit(1600)
 
 #a function to clear output after every frame using lambda to map cls from os into clear
 clear = lambda:os.system('cls')
@@ -56,10 +56,10 @@ def createcanvas(width,height):
 
 #----------------------------------------------------------------------#
 #a function to add a pixel at a certain point
-def pointat(x,y,z=0):
+def pointat(x,y,intensity=0):
     if(y>=0 and x>=0 and x<len(output[0]) and y<len(output)):
         try:
-            v = char[round(z)]
+            v = char[round(intensity)]
         except(IndexError,ValueError):
             v = " "
         output[y][x] = v
@@ -67,7 +67,7 @@ def pointat(x,y,z=0):
 
 #----------------------------------------------------------------------#
 #a function to draw line
-def line_2d(x1,y1,x2,y2,z=0,key=True):
+def line_2d(x1,y1,x2,y2,intensity=0,key=True):
     #finding change in x and y
     dx = x2-x1
     dy = y2-y1
@@ -81,7 +81,7 @@ def line_2d(x1,y1,x2,y2,z=0,key=True):
     Yinc = dy/steps
     #increasing that much every steps for all the steps
     for i in range(steps):
-        pointat(round(x),round(y),z)
+        pointat(round(x),round(y),intensity)
         x = x+Xinc
         y = y+Yinc
     #if we dont wanna draw the the line as soon as it computes the points
@@ -91,18 +91,18 @@ def line_2d(x1,y1,x2,y2,z=0,key=True):
 
 #----------------------------------------------------------------------#
 #drawing a rectangle is just 4 lines and instead of drawing 4 times we can draw just once 
-def rect_2d(x1,y1,width,height,z=0,key=True):
-    line_2d(x1,y1,x1+width,y1,z,False)
-    line_2d(x1,y1,x1,y1+height,z,False)
-    line_2d(x1+width,y1,x1+width,y1+height+1,z,False)
-    line_2d(x1,y1+height,x1+width,y1+height,z,False)
+def rect_2d(x1,y1,width,height,intensity=0,key=True):
+    line_2d(x1,y1,x1+width,y1,intensity,False)
+    line_2d(x1,y1,x1,y1+height,intensity,False)
+    line_2d(x1+width,y1,x1+width,y1+height+1,intensity,False)
+    line_2d(x1,y1+height,x1+width,y1+height,intensity,False)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#        
 #function to draw the ellipse by midpoint algorithim       
-def ellipse_2d(xc, yc,rx, ry,z=0,key=True):  
+def ellipse_2d(xc, yc,rx, ry,intensity=0,key=True):  
     points=[]
     x = 0 
     y = ry  
@@ -151,20 +151,20 @@ def ellipse_2d(xc, yc,rx, ry,z=0,key=True):
             dy = dy - (2 * rx * rx)  
             d2 = d2 + dx - dy + (rx * rx)
     for j in points:
-        pointat(j[0],j[1],z)
+        pointat(j[0],j[1],intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #function to draw an arc by rotating point 0.1 radians
-def arc(x,y,r,a,z=0,key=True):
+def arc_2d(x,y,r,a,intensity=0,key=True):
     drawing= True
     i=0
     while(drawing):
         if(i>=a):
             drawing= False
-        pointat(round(x+r*math.cos(i)),round(y+r*math.sin(i)),z)
+        pointat(round(x+r*math.cos(i)),round(y+r*math.sin(i)),intensity)
         i+=0.1  
     if(key):
         draw()
@@ -220,31 +220,31 @@ def extract():
 
 #----------------------------------------------------------------------#
 #function to scale the the interface
-def scale(s,k=True,z=0):
+def scale_2d(s,k=True,intensity=0):
     points = extract()
     clearbg()
     for i in points:
         nx = i[0]*s
         ny = i[1]*s
-        pointat(round(nx),round(ny),z)
+        pointat(round(nx),round(ny),intensity)
     if(k):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #extracts the point transforms the points and adds them to the matrix
-def transform_2d(x,y,z=0,key=True):
+def transform_2d(x,y,intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
-        pointat(j[0]+x,j[1]+y,0)
+        pointat(j[0]+x,j[1]+y,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #extracts the point rotates in the xy plane adds points back
-def rotate_at_2d(x,y,a,z=0,key=True):
+def rotate_at_2d(x,y,a,intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
@@ -256,13 +256,10 @@ def rotate_at_2d(x,y,a,z=0,key=True):
         l = round(n*math.cos(a)-m*math.sin(a))
         k+=x
         l+=y
-        pointat(k,l,z)
+        pointat(k,l,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
-def test():
-    print("working")
-
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -273,7 +270,7 @@ def isValid(m, n, x, y, prevC, newC):
         return False
     return True
 
-def floodFill(xx, yy,newc=0): 
+def floodFill(xx, yy,newc): 
     queue = []
     x = yy
     y = xx
@@ -311,8 +308,8 @@ def floodFill(xx, yy,newc=0):
             output[posX][posY-1]= newC 
             queue.append([posX, posY-1]) 
 
-def fill(x,y,z=0,key=True):
-    floodFill(x,y,z)
+def fill(x,y,intensity=0,key=True):
+    floodFill(x,y,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
