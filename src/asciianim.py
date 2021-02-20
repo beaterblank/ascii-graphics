@@ -38,29 +38,26 @@ mat=[]
 #----------------------------------------------------------------------#
 #functions to return window width and height
 def width():
-    return len(output)
-def height():
     return len(output[0])
+def height():
+    return len(output)
 def aspect():
     return height()/width()
 #----------------------------------------------------------------------#
 
 #function to create a canvas
-def createcanvas(width,height):
-    #seting the size of command prompt
+def createcanvas(width=239,height=134):
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
     #making it full screen
     pyautogui.press("f11")
-    cursor.hide() 
-    #instantiating the 2d matrix
-    rows, cols = (width, int(height))
+    cursor.hide()
+    os.system('')
+    rows, cols = (width,height)
     for i in range(cols): 
         col = [] 
         for j in range(rows): 
-            col.append(" ") 
+            col.append(["\u001b[0m"," "]) 
         output.append(col)
-    #clearing whatever is on the output 
-    clear()
 
     #3d###
     for i in range(4): 
@@ -80,23 +77,58 @@ def createcanvas(width,height):
     mat[2][3] = 1.0
     
 #----------------------------------------------------------------------#
+#-----------------------system_functions-------------------------------#
+#----------------------------------------------------------------------#
+
+#----------------------------------------------------------------------#
+#a function to print all the elements in the 2d array
+
+#----------------------------------------------------------------------#
+def draw():
+    k=1
+    clear()
+    for i in output:
+        if(k>1):
+            print()
+        for j in i:
+            print(j[0]+j[1],end='')
+        k+=1
+#----------------------------------------------------------------------#
+#a function to clearbg which simply puts blanks into all of the 2d list
+def clearbg():
+    for i in range(len(output)):
+        for j in range(len(output[i])):
+            output[i][j][1]=" "
+#----------------------------------------------------------------------#
+
+#----------------------------------------------------------------------#
+#extracts all the active points and returns it
+def extract():
+    points=[]
+    for i in range(len(output)):
+        for j in range(len(output[i])):
+            if(output[i][j][1]!=" "):
+                points.append([i,j])
+    return points
+
+#----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #a function to add a pixel at a certain point
-def pointat(x,y,intensity=0):
-    if(y>=0 and x>=0 and x<len(output[0]) and y<len(output)):
-        try:
-            v = char[round(intensity)]
-        except(IndexError,ValueError):
-            v = " "
-        output[y][x] = v
+def point(x,y,color,intensity=0):
+    color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
+    color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
+    intensity = intensity if(intensity<=69 and intensity>=0) else 69
+    code = color[0]*16+color[1]
+    ansi = "\u001b[38;5;"+str(code)+"m"
+    output[y][x]=[ansi,char[intensity]]
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #a function to draw line
-def line_2d(x1,y1,x2,y2,intensity=0,key=True):
+def line_2d(x1,y1,x2,y2,color=[0,0],intensity=0,key=True):
     #finding change in x and y
     dx = x2-x1
     dy = y2-y1
@@ -110,7 +142,7 @@ def line_2d(x1,y1,x2,y2,intensity=0,key=True):
     Yinc = dy/steps
     #increasing that much every steps for all the steps
     for i in range(steps+1):
-        pointat(round(x),round(y),intensity)
+        point(round(x),round(y),color,intensity)
         x = x+Xinc
         y = y+Yinc
     #if we dont wanna draw the the line as soon as it computes the points
@@ -120,18 +152,18 @@ def line_2d(x1,y1,x2,y2,intensity=0,key=True):
 
 #----------------------------------------------------------------------#
 #drawing a rectangle is just 4 lines and instead of drawing 4 times we can draw just once 
-def rect_2d(x1,y1,width,height,intensity=0,key=True):
-    line_2d(x1,y1,x1+width,y1,intensity,False)
-    line_2d(x1,y1,x1,y1+height,intensity,False)
-    line_2d(x1+width,y1,x1+width,y1+height,intensity,False)
-    line_2d(x1,y1+height,x1+width,y1+height,intensity,False)
+def rect_2d(x1,y1,width,height,color=[0,0],intensity=0,key=True):
+    line_2d(x1,y1,x1+width,y1,color,intensity,False)
+    line_2d(x1,y1,x1,y1+height,color,intensity,False)
+    line_2d(x1+width,y1,x1+width,y1+height,color,intensity,False)
+    line_2d(x1,y1+height,x1+width,y1+height,color,intensity,False)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#        
 #function to draw the ellipse by midpoint algorithim       
-def ellipse_2d(xc, yc,rx, ry,intensity=0,key=True):  
+def ellipse_2d(xc, yc,rx, ry,color=[0,0],intensity=0,key=True):  
     points=[]
     x = 0 
     y = ry  
@@ -180,61 +212,26 @@ def ellipse_2d(xc, yc,rx, ry,intensity=0,key=True):
             dy = dy - (2 * rx * rx)  
             d2 = d2 + dx - dy + (rx * rx)
     for j in points:
-        pointat(j[0],j[1],intensity)
+        point(j[0],j[1],color,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #function to draw an arc by rotating point 0.1 radians
-def arc_2d(x,y,r,a,intensity=0,key=True):
+def arc_2d(x,y,r,a,color=[0,0],intensity=0,key=True):
     drawing= True
     i=0
     while(drawing):
         if(i>=a):
             drawing= False
-        pointat(round(x+r*math.cos(i)),round(y+r*math.sin(i)),intensity)
+        point(round(x+r*math.cos(i)),round(y+r*math.sin(i)),color,intensity)
         i+=0.1  
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
-#----------------------------------------------------------------------#
-#-----------------------system_functions-------------------------------#
-#----------------------------------------------------------------------#
 
-#----------------------------------------------------------------------#
-#a function to print all the elements in the 2d array
-def draw():
-    k=1
-    clear()
-    for i in output:
-        if(k>1):
-            print()
-        for j in i:
-            print(j,end='')
-        k+=1
-#----------------------------------------------------------------------#
-
-
-
-#----------------------------------------------------------------------#
-#a function to clearbg which simply puts blanks into all of the 2d list
-def clearbg():
-    for i in range(len(output)):
-        for j in range(len(output[i])):
-            output[i][j]=char[0]
-#----------------------------------------------------------------------#
-
-#----------------------------------------------------------------------#
-#extracts all the active points and returns it
-def extract():
-    points=[]
-    for i in range(len(output)):
-        for j in range(len(output[i])):
-            if(output[i][j]!=char[0]):
-                points.append([i,j])
-    return points
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -243,31 +240,31 @@ def extract():
 
 #----------------------------------------------------------------------#
 #function to scale the the interface
-def scale_2d(s,key=True,intensity=0):
+def scale_2d(s,color=[0,0],intensity=0,key=True):
     points = extract()
     clearbg()
     for i in points:
         nx = i[0]*s
         ny = i[1]*s
-        pointat(round(nx),round(ny),intensity)
+        point(round(nx),round(ny),color,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #extracts the point transforms the points and adds them to the matrix
-def transform_2d(x,y,intensity=0,key=True):
+def transform_2d(x,y,color,intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
-        pointat(j[0]+x,j[1]+y,intensity)
+        point(j[0]+x,j[1]+y,color,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #extracts the point rotates in the xy plane adds points back
-def rotate_at_2d(x,y,a,intensity=0,key=True):
+def rotate_at_2d(x,y,a,color,intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
@@ -279,7 +276,7 @@ def rotate_at_2d(x,y,a,intensity=0,key=True):
         l = round(n*math.cos(a)-m*math.sin(a))
         k+=x
         l+=y
-        pointat(k,l,intensity)
+        point(k,l,color,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
@@ -288,69 +285,28 @@ def rotate_at_2d(x,y,a,intensity=0,key=True):
 #----------------------------------------------------------------------#
 #----------------------------flood fill--------------------------------#
 #----------------------------------------------------------------------#
-def isValid(m, n, x, y, prevC, newC): 
-    if (x<0 or x>= n or y<0 or y>= m or output[x][y]!= prevC or output[x][y]== newC): 
-        return False
-    return True
-
-def floodFill(xx, yy,newc): 
-    queue = []
-    x = yy
-    y = xx
-    m = height()
-    n = width()
-    prevC = " "
-    newC = char[newc] 
-    # Append the position of starting  
-    # pixel of the component 
-    queue.append([x, y]) 
-    # Color the pixel with the new color 
-    output[x][y] = newC 
-    # While the queue is not empty i.e. the  
-    # whole component having prevC color  
-    # is not colored with newC color 
-    while queue: 
-        # Dequeue the front node 
-        currPixel = queue.pop() 
-        posX = currPixel[0] 
-        posY = currPixel[1] 
-        # Check if the adjacent 
-        # pixels are valid 
-        if isValid(m, n,posX + 1, posY,   prevC, newC): 
-            # Color with newC 
-            # if valid and enqueue 
-            output[posX + 1][posY] = newC 
-            queue.append([posX + 1, posY]) 
-        if isValid(m, n,posX-1, posY,prevC, newC): 
-            output[posX-1][posY]= newC 
-            queue.append([posX-1, posY]) 
-        if isValid(m, n,posX, posY + 1,prevC, newC): 
-            output[posX][posY + 1]= newC 
-            queue.append([posX, posY + 1]) 
-        if isValid(m, n,posX, posY-1,prevC, newC): 
-            output[posX][posY-1]= newC 
-            queue.append([posX, posY-1]) 
-
-def fill(x,y,intensity=0,key=True):
-    floodFill(x,y,intensity)
-    if(key):
-        draw()
+        #gotta rewrite floodfill
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #----------------------------------text--------------------------------#
 #----------------------------------------------------------------------#
 
-def char_at(x,y,char):
+def char_at(x,y,char,color=[0,0]):
+    color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
+    color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
+    code = color[0]*16+color[1]
+    ansi = "\u001b[38;5;"+str(code)+"m"
     if(y>=0 and x>=0 and x<len(output[0]) and y<len(output)):
-        output[y][x] = char
+        output[y][x][1] = char
+        output[y][x][0] = ansi
 
-def text(x,y,string,key=True):
+def text(x,y,string,color=[0,1],key=True):
     for char in string:
         if(x>width()):
             y+=1
             x=0
-        char_at(x,y,char)
+        char_at(x,y,char,color)
         x+=1
     if(key):
         draw()
