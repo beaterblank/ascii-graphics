@@ -1,7 +1,7 @@
 # ascii-graphics
 
 
-__Note__ to check the code goto ![code](src/asciianim.py) on running code goes into full screen u can get out of the full screen by pressing f11
+__Note__ to check the code goto [code](src/asciianim.py) on running code goes into full screen u can get out of the full screen by pressing f11
 
 __this is only available for windows operating systems right now__
 (best used on windows 10)
