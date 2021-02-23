@@ -46,7 +46,7 @@ def aspect():
 #----------------------------------------------------------------------#
 
 #function to create a canvas
-def createcanvas(width=239,height=134):
+def createcanvas(width=240,height=135):
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
     #making it full screen
     pyautogui.press("f11")
