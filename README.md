@@ -21,7 +21,7 @@ we need to configure our command prompt to show us square texts or else
 install the software by using
 
 __python -m pip install asciigraphics__(i didnot publish this yet after publishing this command will work)
-(for now to set it up u will need wheel library so install it first by python -m pip install wheel then downlad my files from github then use command *python setup.py bdist_wheel* followed by *python -m pip install -e .* to install this locally)
+(for now to set it up u will need wheel library so install it first by **python -m pip install wheel** then downlad my files from github then use command **python setup.py bdist_wheel** followed by **python -m pip install -e .** to install this locally)
 
 import the 2d graphics and animation module by using the command
 
