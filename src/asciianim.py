@@ -121,6 +121,7 @@ def in_range(x,y):
 #----------------------------------------------------------------------#
 def colorat(x,y):
     return int(str(re.search("\d+m",output[y][x][0])[0])[:-1])
+
 #----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
 #----------------------------------------------------------------------#
@@ -128,6 +129,8 @@ def colorat(x,y):
 #----------------------------------------------------------------------#
 #a function to add a pixel at a certain point
 def point(x,y,color,intensity=0):
+    x=round(x)
+    y=round(y)
     if(in_range(x,y)):
         color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
         color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
@@ -153,7 +156,7 @@ def line_2d(x1,y1,x2,y2,color=[0,0],intensity=0,key=True):
     Yinc = dy/steps
     #increasing that much every steps for all the steps
     for i in range(steps+1):
-        point(round(x),round(y),color,intensity)
+        point(x,y,color,intensity)
         x = x+Xinc
         y = y+Yinc
     #if we dont wanna draw the the line as soon as it computes the points
@@ -236,7 +239,7 @@ def arc_2d(x,y,r,a,color=[0,0],intensity=0,key=True):
     while(drawing):
         if(i>=a):
             drawing= False
-        point(round(x+r*math.cos(i)),round(y+r*math.sin(i)),color,intensity)
+        point(x+r*math.cos(i),y+r*math.sin(i),color,intensity)
         i+=0.1  
     if(key):
         draw()
@@ -288,7 +291,7 @@ def scale_2d(s,color=[0,0],intensity=0,key=True):
     for i in points:
         nx = i[0]*s
         ny = i[1]*s
-        point(round(nx),round(ny),color,intensity)
+        point(nx,ny,color,intensity)
     if(key):
         draw()
 #----------------------------------------------------------------------#
@@ -314,8 +317,8 @@ def rotate_at_2d(x,y,a,color,intensity=0,key=True):
         n = j[1]
         m-=x
         n-=y
-        k = round(n*math.sin(a)+m*math.cos(a))
-        l = round(n*math.cos(a)-m*math.sin(a))
+        k = (n*math.sin(a)+m*math.cos(a))
+        l = (n*math.cos(a)-m*math.sin(a))
         k+=x
         l+=y
         point(k,l,color,intensity)
