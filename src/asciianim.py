@@ -22,6 +22,8 @@ import math
 import cursor
 import pyautogui
 import keyboard
+import re
+
 sys.setrecursionlimit(1600)
 
 #a function to clear output after every frame using lambda to map cls from os into clear
@@ -112,18 +114,27 @@ def extract():
     return points
 
 #----------------------------------------------------------------------#
+def in_range(x,y):
+    if(y<0 or y>len(output) or x<0 or x>len(output[0])):
+        return False
+    return True
+#----------------------------------------------------------------------#
+def colorat(x,y):
+    return int(str(re.search("\d+m",output[y][x][0])[0])[:-1])
+#----------------------------------------------------------------------#
 #-----------------------2d_drawing_functions---------------------------#
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #a function to add a pixel at a certain point
 def point(x,y,color,intensity=0):
-    color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
-    color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
-    intensity = intensity if(intensity<=69 and intensity>=0) else 69
-    code = color[0]*16+color[1]
-    ansi = "\u001b[38;5;"+str(code)+"m"
-    output[y][x]=[ansi,char[intensity]]
+    if(in_range(x,y)):
+        color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
+        color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
+        intensity = intensity if(intensity<=69 and intensity>=0) else 69
+        code = color[0]*16+color[1]
+        ansi = "\u001b[38;5;"+str(code)+"m"
+        output[y][x]=[ansi,char[intensity]]
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -231,7 +242,38 @@ def arc_2d(x,y,r,a,color=[0,0],intensity=0,key=True):
         draw()
 #----------------------------------------------------------------------#
 
+def is_valid(x,y,pc,nc):
+    if(in_range(x,y)):
+        if(colorat(x,y)!=pc or colorat(x,y)==nc):
+            return False
+    return True
 
+def fill(x,y,Pc,Nc,fillc,key=True):
+    pc = Pc[0]*16+Pc[1]
+    nc = Nc[0]*16+Nc[1]
+
+    queue = []
+    queue.append([x,y])
+    point(x,y,fillc)
+
+    while queue:
+        cur_pix=queue.pop()
+        px = cur_pix[0]
+        py = cur_pix[1]
+        if(is_valid(px+1,py,pc,nc)):
+            point(px+1,py,fillc)
+            queue.append([px+1,py])
+        if(is_valid(px-1,py,pc,nc)):
+            point(px-1,py,fillc)
+            queue.append([px-1,py])
+        if(is_valid(px,py+1,pc,nc)):
+            point(px,py+1,fillc)
+            queue.append([px,py+1])
+        if(is_valid(px,py-1,pc,nc)):
+            point(px,py-1,fillc)
+            queue.append([px,py-1])
+    if(key):
+        draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
