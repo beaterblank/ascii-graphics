@@ -34,8 +34,6 @@ chars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI:,\"^`'. 
 char = list(chars)
 #initializing output varible
 output=[]
-#making a projection matrix
-mat=[]
 
 #----------------------------------------------------------------------#
 #functions to return window width and height
@@ -61,22 +59,6 @@ def createcanvas(width=240,height=135):
             col.append(["\u001b[0m"," "]) 
         output.append(col)
 
-    #3d###
-    for i in range(4): 
-        col = [] 
-        for j in range(4): 
-            col.append(0.0) 
-        mat.append(col)
-    near = 0.1
-    far = 1000
-    fov = 90
-    aspectratio = aspect()
-    fovrad = 1/math.tan(fov*0.5/180*math.pi)
-    mat[0][0] = aspectratio*fovrad
-    mat[1][1] = fovrad
-    mat[2][2] = far/(far-near)  
-    mat[3][2] = -far*near/(far-near)
-    mat[2][3] = 1.0
     
 #----------------------------------------------------------------------#
 #-----------------------system_functions-------------------------------#
@@ -115,7 +97,7 @@ def extract():
 
 #----------------------------------------------------------------------#
 def in_range(x,y):
-    if(y<0 or y>len(output) or x<0 or x>len(output[0])):
+    if(y<0 or y>=len(output) or x<0 or x>=len(output[0])):
         return False
     return True
 #----------------------------------------------------------------------#
@@ -150,15 +132,16 @@ def line_2d(x1,y1,x2,y2,color=[0,0],intensity=0,key=True):
     x = x1
     y = y1
     #computing which direction has grater number of steps and and how many
-    steps  = abs(dx) if(abs(dx)>abs(dy)) else abs(dy)
+    steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
     #dividing the change by steps to increase then on every iteration
-    Xinc = dx/steps
-    Yinc = dy/steps
-    #increasing that much every steps for all the steps
-    for i in range(steps+1):
-        point(x,y,color,intensity)
-        x = x+Xinc
-        y = y+Yinc
+    if(steps>0):
+        Xinc = dx/steps
+        Yinc = dy/steps
+        #increasing that much every steps for all the steps
+        for i in range(steps+1):
+            point(x,y,color,intensity)
+            x = x+Xinc
+            y = y+Yinc
     #if we dont wanna draw the the line as soon as it computes the points
     if(key):
         draw()
@@ -395,22 +378,57 @@ class triangle:
 class mesh:
     k:list[triangle]
 
-def filledtriangle(a,b,c,intensity,key=False):
-    line_2d(a.x,a.y,b.x,b.y,intensity,False)
-    line_2d(b.x,b.y,c.x,c.y,intensity,False)
-    line_2d(a.x,a.y,c.x,c.y,intensity,False)
-    centeroid = intvector2d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3))
-    fill(centeroid.x,centeroid.y,intensity,False)
+def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
+    #finding change in x and y
+    dx = x2-x1
+    dy = y2-y1
+    dz = z2-z1
+    #setting the starting points
+    x = x1
+    y = y1
+    z = z1
+    #computing which direction has grater number of steps and and how many
+    steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
+    #dividing the change by steps to increase then on every iteration
+    if(steps>0):
+        Xinc = dx/steps
+        Yinc = dy/steps
+        Zinc = dz/steps
+        #increasing that much every steps for all the steps
+        for i in range(steps+1):
+            point(x,y,color,round(z))
+            x = x+Xinc
+            y = y+Yinc
+            z = z+Zinc
+    #if we dont wanna draw the the line as soon as it computes the points
     if(key):
         draw()
 
-def mulvecmat(i,m):
-    o = vector3d(0,0,0)
-    o.x = i.x*m[0][0]+i.y*m[1][0]+i.z*m[2][0]+m[3][0]
-    o.y = i.x*m[0][1]+i.y*m[1][1]+i.z*m[2][0]+m[3][1]
-    o.z = i.x*m[0][2]+i.y*m[1][2]+i.z*m[2][0]+m[3][2]
-    w   = i.x*m[0][3]+i.y*m[1][3]+i.z*m[2][0]+m[3][3]
-    if(w!=0):
-        o.x = o.x/w
-        o.y = o.y/w
-        o.z = o.z/w
+def triangle_3d(tri,intensity=0,key=False,fillkey=False):
+    a=to2d(tri.a)
+    b=to2d(tri.b)
+    c=to2d(tri.c)
+
+    line_3d(a.x,a.y,a.z,b.x,b.y,b.z,[10,10],False)
+    line_3d(b.x,b.y,b.z,c.x,c.y,c.z,[10,10],False)
+    line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[10,10],False)
+
+    centeroid = intvector2d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3))
+
+    if(fillkey):
+        fill(centeroid.x,centeroid.y,intensity,False)
+    if(key):
+        draw()
+    
+
+
+def to2d(i,f=100):
+    w=width()
+    h=height()
+    x=i.x
+    y=i.y
+    z=i.z
+    x = ((z*w)/(2*f))+x-((z*x)/(f))
+    y = ((z*h)/(2*f))+y-((z*y)/(f))
+    o = vector3d(x,y,z)
+    return o
