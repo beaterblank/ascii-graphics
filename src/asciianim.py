@@ -114,6 +114,7 @@ def point(x,y,color,intensity=0):
     x=round(x)
     y=round(y)
     if(in_range(x,y)):
+        print(color[0])
         color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
         color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
         intensity = intensity if(intensity<=69 and intensity>=0) else 69
@@ -149,7 +150,7 @@ def line_2d(x1,y1,x2,y2,color=[0,0],intensity=0,key=True):
 
 #----------------------------------------------------------------------#
 #drawing a rectangle is just 4 lines and instead of drawing 4 times we can draw just once 
-def rect_2d(x1,y1,width,height,color=[0,0],intensity=0,key=True):
+def rect_2d(x1,y1,width,height,color=[5,5],intensity=0,key=True):
     line_2d(x1,y1,x1+width,y1,color,intensity,False)
     line_2d(x1,y1,x1,y1+height,color,intensity,False)
     line_2d(x1+width,y1,x1+width,y1+height,color,intensity,False)
@@ -340,6 +341,43 @@ def text(x,y,string,color=[0,1],key=True):
         draw()
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
+#2d algorithims#
+def Liang_Barsky(x1,y1,x2,y2,xmin,ymin,xmax,ymax):
+    dx=x2-x1
+    dy=y2-y1
+    p1,p2,p3,p4 = -dx,dx,-dy,dy
+    p=[p1,p2,p3,p4]
+    q1,q2,q3,q4 = x1-xmin,xmax-x1,y1-ymin,ymax-y1
+    q=[q1,q2,q3,q4]
+    r=[0,0,0,0]
+    u1=[0]
+    u2=[1]
+    for k in range(4):
+        if(p[k]==0 and q[k]<0):
+            return [x1,y1,x2,y2]
+        r[k]=q[k]/p[k]
+        if(p[k]<0):
+            u1.append(r[k])
+        else:
+            u2.append(r[k])
+    U1=max(u1)
+    U2=min(u2)
+    if(U1<U2):
+        x_1 = x1+U1*dx
+        y_1 = y1+U1*dy
+        x_2 = x1+U2*dx
+        y_2 = y1+U2*dy
+        return [x_1,y_1,x_2,y_2]
+    else:
+        return [x1,y1,x2,y2]
+
+def clipline(x1,y1,x2,y2,xmin,ymin,xmax,ymax,outcol=[3,3],incol=[2,2],bodercol=[10,10],debug=False):
+    k = Liang_Barsky(x1,y1,x2,y2,xmin,ymin,xmax,ymax)
+    rect_2d(xmin,ymin,xmax-xmin,ymax-ymin,bodercol,0,False)
+    line_2d(x1,y1,k[0],k[1],outcol,0,False)
+    line_2d(k[2],k[3],k[0],k[1],incol,0,False)
+    line_2d(x2,y2,k[2],k[3],outcol,False)
+
 
 #----------------------------------------------------------------------#
 #----------------------------------end---------------------------------#
@@ -420,8 +458,6 @@ def triangle_3d(tri,intensity=0,key=False,fillkey=False):
     if(key):
         draw()
     
-
-
 def to2d(i,f=100):
     w=width()
     h=height()
