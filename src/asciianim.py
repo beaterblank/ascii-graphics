@@ -46,12 +46,14 @@ def aspect():
 #----------------------------------------------------------------------#
 
 #function to create a canvas
-def createcanvas(width=240,height=135):
+def createcanvas(width=240,height=135,fullscreen=False):
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
     #making it full screen
-    pyautogui.press("f11")
+    if(fullscreen):
+        pyautogui.press("f11")
     cursor.hide()
     os.system('')
+    clear()
     rows, cols = (width,height)
     for i in range(cols): 
         col = [] 
@@ -114,13 +116,12 @@ def point(x,y,color,intensity=0):
     x=round(x)
     y=round(y)
     if(in_range(x,y)):
-        print(color[0])
         color[0] = color[0] if(color[0]<16 and color[0]>=0) else 16
         color[1] = color[1] if(color[1]<16 and color[1]>=0) else 16
         intensity = intensity if(intensity<=69 and intensity>=0) else 69
         code = color[0]*16+color[1]
         ansi = "\u001b[38;5;"+str(code)+"m"
-        output[y][x]=[ansi,char[intensity]]
+        output[y][x]=[ansi,char[0]]
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -229,38 +230,7 @@ def arc_2d(x,y,r,a,color=[0,0],intensity=0,key=True):
         draw()
 #----------------------------------------------------------------------#
 
-def is_valid(x,y,pc,nc):
-    if(in_range(x,y)):
-        if(colorat(x,y)!=pc or colorat(x,y)==nc):
-            return False
-    return True
 
-def fill(x,y,Pc,Nc,fillc,key=True):
-    pc = Pc[0]*16+Pc[1]
-    nc = Nc[0]*16+Nc[1]
-
-    queue = []
-    queue.append([x,y])
-    point(x,y,fillc)
-
-    while queue:
-        cur_pix=queue.pop()
-        px = cur_pix[0]
-        py = cur_pix[1]
-        if(is_valid(px+1,py,pc,nc)):
-            point(px+1,py,fillc)
-            queue.append([px+1,py])
-        if(is_valid(px-1,py,pc,nc)):
-            point(px-1,py,fillc)
-            queue.append([px-1,py])
-        if(is_valid(px,py+1,pc,nc)):
-            point(px,py+1,fillc)
-            queue.append([px,py+1])
-        if(is_valid(px,py-1,pc,nc)):
-            point(px,py-1,fillc)
-            queue.append([px,py-1])
-    if(key):
-        draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -314,7 +284,38 @@ def rotate_at_2d(x,y,a,color,intensity=0,key=True):
 #----------------------------------------------------------------------#
 #----------------------------flood fill--------------------------------#
 #----------------------------------------------------------------------#
-        #gotta rewrite floodfill
+def is_valid(x,y,pc,nc):
+    if(in_range(x,y)):
+        if(colorat(x,y)!=pc or colorat(x,y)==nc):
+            return False
+    return True
+
+def fill(x,y,Pc,Nc,fillc,key=True):
+    pc = Pc[0]*16+Pc[1]
+    nc = Nc[0]*16+Nc[1]
+
+    queue = []
+    queue.append([x,y])
+    point(x,y,fillc)
+
+    while queue:
+        cur_pix=queue.pop()
+        px = cur_pix[0]
+        py = cur_pix[1]
+        if(is_valid(px+1,py,pc,nc)):
+            point(px+1,py,fillc)
+            queue.append([px+1,py])
+        if(is_valid(px-1,py,pc,nc)):
+            point(px-1,py,fillc)
+            queue.append([px-1,py])
+        if(is_valid(px,py+1,pc,nc)):
+            point(px,py+1,fillc)
+            queue.append([px,py+1])
+        if(is_valid(px,py-1,pc,nc)):
+            point(px,py-1,fillc)
+            queue.append([px,py-1])
+    if(key):
+        draw()
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -353,7 +354,9 @@ def Liang_Barsky(x1,y1,x2,y2,xmin,ymin,xmax,ymax):
     u1=[0]
     u2=[1]
     for k in range(4):
-        if(p[k]==0 and q[k]<0):
+        if((p[k]==0 and q[k]<0) ):
+            return [x1,ymin,x1,ymax]
+        if((p[k]==0 and q[k]>=0) ):
             return [x1,y1,x2,y2]
         r[k]=q[k]/p[k]
         if(p[k]<0):
@@ -378,7 +381,49 @@ def clipline(x1,y1,x2,y2,xmin,ymin,xmax,ymax,outcol=[3,3],incol=[2,2],bodercol=[
     line_2d(k[2],k[3],k[0],k[1],incol,0,False)
     line_2d(x2,y2,k[2],k[3],outcol,False)
 
+def pside(xmin,ymin,xmax,ymax,p1):
+    if(p1[0]==xmin):
+        s1=1
+    if(p1[1]==ymin):
+        s1=2
+    if(p1[0]==xmax):
+        s1=3
+    if(p1[1]==ymax):
+        s1=4
 
+def findvor(xmin,ymin,xmax,ymax,p1,p2):
+    s1,s2=pside(xmin,ymin,xmax,ymax,p1),pside(xmin,ymin,xmax,ymax,p1)
+    if(s1==s2):
+        return p1
+    
+
+
+def clippoly(xmin,ymin,xmax,ymax,outcol,incol,bodercol,*points):
+    p=[]
+    f1=False
+    f2=False
+    ctr=0
+    rect_2d(xmin,ymin,xmax-xmin,ymax-ymin,bodercol,0,False)
+    for k in points:
+        if(ctr==0):
+            temp=k
+        p.append(k)
+        ctr+=1
+    p.append(temp)
+    for i in range(len(p)-1):
+        x1=p[i][0]
+        x2=p[i+1][0]
+        y1=p[i][1]
+        y2=p[i+1][1]
+        k = Liang_Barsky(x1,y1,x2,y2,xmin,ymin,xmax,ymax)        
+        if(x1==k[0] and y1==k[1] and x2==k[2] and y2 ==k[3]):
+            line_2d(x1,y1,x2,y2,outcol,0,False)
+        else:
+            line_2d(k[0],k[1],k[2],k[3],incol,0,False)
+            line_2d(x1,y1,k[0],k[1],outcol,0,False)
+            line_2d(x2,y2,k[2],k[3],outcol,0,False)
+    draw()
+             
 #----------------------------------------------------------------------#
 #----------------------------------end---------------------------------#
 #----------------------------------------------------------------------#
@@ -467,4 +512,20 @@ def to2d(i,f=100):
     x = ((z*w)/(2*f))+x-((z*x)/(f))
     y = ((z*h)/(2*f))+y-((z*y)/(f))
     o = vector3d(x,y,z)
+    return o
+
+def rx(a,p):
+    o=p
+    o.y=p.y*math.cos(a)-p.z*math.sin(a)
+    o.z=p.y*math.sin(a)+p.z*math.cos(a)
+    return o
+def ry(a,p):
+    o=p
+    o.x=p.x*math.cos(a)+p.z*math.sin(a)
+    o.z=-p.x*math.sin(a)+p.z*math.cos(a)
+    return o
+def rz(a,p):
+    o=p
+    o.x=p.x*math.cos(a)-p.y*math.sin(a)
+    o.y=p.x*math.sin(a)+p.y*math.cos(a)
     return o
