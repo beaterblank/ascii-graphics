@@ -66,25 +66,15 @@ def createcanvas(width=240,height=135,fullscreen=False):
 #-----------------------system_functions-------------------------------#
 #----------------------------------------------------------------------#
 
-#----------------------------------------------------------------------#
-#a function to print all the elements in the 2d array
 
-#----------------------------------------------------------------------#
-def draw():
-    k=1
-    clear()
-    for i in output:
-        if(k>1):
-            print()
-        for j in i:
-            print(j[0]+j[1],end='')
-        k+=1
 #----------------------------------------------------------------------#
 #a function to clearbg which simply puts blanks into all of the 2d list
 def clearbg():
-    for i in range(len(output)):
-        for j in range(len(output[i])):
-            output[i][j][1]=" "
+    points=extract()
+    for j in points:
+        x=j[0]
+        y=j[1]
+        output[x][y][1]=" "
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -94,9 +84,21 @@ def extract():
     for i in range(len(output)):
         for j in range(len(output[i])):
             if(output[i][j][1]!=" "):
-                points.append([i,j])
+                points.append([i,j,output[i][j][0],output[i][j][1]])
     return points
+#----------------------------------------------------------------------#
+#a function to print all the elements in the 2d array
 
+#----------------------------------------------------------------------#
+def draw():
+    points = extract()
+    clear()
+    for j in points:
+        x=j[0]
+        y=j[1]
+        text=output[x][y][0]+output[x][y][1]
+        sys.stdout.write("\x1b7\x1b[%d;%df%s\x1b8" % (x, y, text))
+        sys.stdout.flush()
 #----------------------------------------------------------------------#
 def in_range(x,y):
     if(y<0 or y>=len(output) or x<0 or x>=len(output[0])):
@@ -439,17 +441,16 @@ def clippoly(xmin,ymin,xmax,ymax,outcol,incol,bodercol,*points):
 
 import math
 from dataclasses import dataclass
+@dataclass
+class intvector2d:
+    x:int
+    y:int
 
 @dataclass
 class vector3d:
     x:float
     y:float
     z:float
-
-@dataclass
-class intvector2d:
-    x:int
-    y:int
 
 @dataclass
 class triangle:

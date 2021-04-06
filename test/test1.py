@@ -1,6 +1,6 @@
 import asciianim as a
 import time
-a.createcanvas(100,100)
+a.createcanvas(135,135,True)
 #points
 p1 = a.vector3d(25,25,0)
 p2 = a.vector3d(25,25,50)
@@ -12,14 +12,15 @@ p7 = a.vector3d(75,75,0)
 p8 = a.vector3d(75,75,50)
 i=0
 while(True):
-    p1=a.rx(0.01,a.ry(0.02,a.rz(0.015,p1)))
-    p2=a.rx(0.01,a.ry(0.02,a.rz(0.015,p2)))
-    p3=a.rx(0.01,a.ry(0.02,a.rz(0.015,p3)))
-    p4=a.rx(0.01,a.ry(0.02,a.rz(0.015,p4)))
-    p5=a.rx(0.01,a.ry(0.02,a.rz(0.015,p5)))
-    p6=a.rx(0.01,a.ry(0.02,a.rz(0.015,p6)))
-    p7=a.rx(0.01,a.ry(0.02,a.rz(0.015,p7)))
-    p8=a.rx(0.01,a.ry(0.02,a.rz(0.015,p8)))
+    time.sleep(0.03)
+    p1=a.rx(0.01,a.ry(0.01,a.rz(0.01,p1)))
+    p2=a.rx(0.01,a.ry(0.01,a.rz(0.01,p2)))
+    p3=a.rx(0.01,a.ry(0.01,a.rz(0.01,p3)))
+    p4=a.rx(0.01,a.ry(0.01,a.rz(0.01,p4)))
+    p5=a.rx(0.01,a.ry(0.01,a.rz(0.01,p5)))
+    p6=a.rx(0.01,a.ry(0.01,a.rz(0.01,p6)))
+    p7=a.rx(0.01,a.ry(0.01,a.rz(0.01,p7)))
+    p8=a.rx(0.01,a.ry(0.01,a.rz(0.01,p8)))
     #triangles
     #south
     t1 = a.triangle(p1,p3,p7)
@@ -46,3 +47,4 @@ while(True):
         a.triangle_3d(mesh.k[i])
     a.draw()
     a.clearbg()
+    

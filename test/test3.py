@@ -1,5 +1,13 @@
 import asciianim as a 
-a.createcanvas()
-a.ellipse_2d(100,100,30,30,[10,10],0,False)
-a.fill(100,100,[0,0],[10,10],[2,2])
-input()
+a.createcanvas(240,135,True)
+def conv(x,y):
+    o=a.intvector2d(x,y)
+    o.x=p.x*240/1920
+    o.y=p.y*135/1080
+    return o
+p1=[]
+while(True):
+    p=a.pyautogui.position()
+    q=conv(p.x,p.y)
+    a.point(round(q.x),round(q.y),[15,15])
+    a.draw()
