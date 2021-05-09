@@ -1,8 +1,7 @@
 import asciianim as a
 import time
 a.createcanvas(240,135,True)
-a.line_2d(10,10,30,30,[2,3])
-a.rotate_at_2d(10,10,0.1,[2,3])
-time.sleep(2)
-a.clearbg()
+a.rect_2d(20,20,40,40)
+a.fill(25,25,[5,5],[10,10])
+a.draw()
 input()

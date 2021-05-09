@@ -21,8 +21,8 @@ import os
 import math
 import cursor
 import pyautogui
-import keyboard
 import re
+import numpy as np
 
 sys.setrecursionlimit(1600)
 
@@ -93,12 +93,14 @@ def extract():
 def draw():
     points = extract()
     clear()
+    string=''
     for j in points:
         x=j[0]
         y=j[1]
         text=output[x][y][0]+output[x][y][1]
-        sys.stdout.write("\x1b7\x1b[%d;%df%s\x1b8" % (x, y, text))
-        sys.stdout.flush()
+        string+=f"\x1b7\x1b[{x};{y}f{text}\x1b8"
+    sys.stdout.write(string)
+    sys.stdout.flush()
 #----------------------------------------------------------------------#
 def in_range(x,y):
     if(y<0 or y>=len(output) or x<0 or x>=len(output[0])):
@@ -123,7 +125,7 @@ def point(x,y,color,intensity=0):
         intensity = intensity if(intensity<=69 and intensity>=0) else 69
         code = color[0]*16+color[1]
         ansi = "\u001b[38;5;"+str(code)+"m"
-        output[y][x]=[ansi,char[0]]
+        output[y][x]=[ansi,char[intensity]]
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
@@ -292,29 +294,29 @@ def is_valid(x,y,pc,nc):
             return False
     return True
 
-def fill(x,y,Pc,Nc,fillc,key=True):
+def fill(x,y,Nc,fillc,intensity=0,key=True,Pc=[0,0]):
     pc = Pc[0]*16+Pc[1]
     nc = Nc[0]*16+Nc[1]
 
     queue = []
     queue.append([x,y])
-    point(x,y,fillc)
+    point(x,y,fillc,intensity)
 
     while queue:
         cur_pix=queue.pop()
         px = cur_pix[0]
         py = cur_pix[1]
         if(is_valid(px+1,py,pc,nc)):
-            point(px+1,py,fillc)
+            point(px+1,py,fillc,intensity)
             queue.append([px+1,py])
         if(is_valid(px-1,py,pc,nc)):
-            point(px-1,py,fillc)
+            point(px-1,py,fillc,intensity)
             queue.append([px-1,py])
         if(is_valid(px,py+1,pc,nc)):
-            point(px,py+1,fillc)
+            point(px,py+1,fillc,intensity)
             queue.append([px,py+1])
         if(is_valid(px,py-1,pc,nc)):
-            point(px,py-1,fillc)
+            point(px,py-1,fillc,intensity)
             queue.append([px,py-1])
     if(key):
         draw()
@@ -488,7 +490,7 @@ def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
     if(key):
         draw()
 
-def triangle_3d(tri,intensity=0,key=False,fillkey=False):
+def triangle_3d(tri,normal,fillkey=False,key=False,light=vector3d(1,1,1)):
     a=to2d(tri.a)
     b=to2d(tri.b)
     c=to2d(tri.c)
@@ -498,20 +500,28 @@ def triangle_3d(tri,intensity=0,key=False,fillkey=False):
     line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[10,10],False)
 
     centeroid = intvector2d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3))
-
+    n = np.array([normal.x,normal.y,normal.z])
+    l = np.array([light.x,light.y,light.z])
+    n = n/np.linalg.norm(n)
+    l = l/np.linalg.norm(l)
+    intensity=round(n.dot(l)*68)
+    if(intensity<0):
+        intensity = 68
     if(fillkey):
-        fill(centeroid.x,centeroid.y,intensity,False)
+        #fillmesh(tri,centeroid[10,10],[10,10],intensity,False)
+        intensity=1
     if(key):
         draw()
     
-def to2d(i,f=100):
+def to2d(i,f=0.005):
     w=width()
     h=height()
-    x=i.x
-    y=i.y
-    z=i.z
-    x = ((z*w)/(2*f))+x-((z*x)/(f))
-    y = ((z*h)/(2*f))+y-((z*y)/(f))
+    p = np.array([i.x,i.y,i.z,1])
+    q = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,f],[0,0,0,1]])
+    r = p.dot(q) 
+    x=r[0]/r[3]
+    y=r[1]/r[3]
+    z=r[2]/r[3]
     o = vector3d(x,y,z)
     return o
 
@@ -530,3 +540,23 @@ def rz(a,p):
     o.x=p.x*math.cos(a)-p.y*math.sin(a)
     o.y=p.x*math.sin(a)+p.y*math.cos(a)
     return o
+
+def normal(p1,p2,p3,up=True):
+    np1=vector3d(0,0,0)
+    np1.x=p2.x-p1.x
+    np1.y=p2.y-p1.y
+    np1.z=p2.z-p1.z
+    np2=vector3d(0,0,0)
+    np2.x=p3.x-p1.x
+    np2.y=p3.y-p1.y
+    np2.z=p3.z-p1.z
+    a = np.array([np1.x,np1.y,np1.z])
+    b = np.array([np2.x,np2.y,np2.z])
+    c = np.cross(a, b)
+    nor = 1 if up else -1
+    len = 1/math.sqrt(c[0]*c[0]+c[1]*c[1]+c[2]*c[2])*nor
+    op = vector3d(0,0,0)
+    op.x=c[0]*len
+    op.y=c[1]*len
+    op.z=c[2]*len
+    return op
