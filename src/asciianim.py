@@ -20,6 +20,7 @@ import sys
 import os
 import math
 import cursor
+from numpy.lib.npyio import zipfile_factory
 import pyautogui
 import re
 import numpy as np
@@ -98,7 +99,7 @@ def draw():
         x=j[0]
         y=j[1]
         text=output[x][y][0]+output[x][y][1]
-        string+=f"\x1b7\x1b[{x};{y}f{text}\x1b8"
+        string+=f"\x1b7\x1b[{x+1};{y+1}f{text}\x1b8"
     sys.stdout.write(string)
     sys.stdout.flush()
 #----------------------------------------------------------------------#
@@ -463,7 +464,8 @@ class triangle:
 @dataclass
 class mesh:
     k:list[triangle]
-
+def dprin(p,e=" "):
+    print([round(p.x,2),round(p.y,2),round(p.z,2)],end=e)
 def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
     #finding change in x and y
     dx = x2-x1
@@ -489,74 +491,176 @@ def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
     #if we dont wanna draw the the line as soon as it computes the points
     if(key):
         draw()
+def triangle_3d(tri,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+    a=to2d(tri.a)[0]
+    b=to2d(tri.b)[0]
+    c=to2d(tri.c)[0]
 
-def triangle_3d(tri,normal,fillkey=False,key=False,light=vector3d(1,1,1)):
-    a=to2d(tri.a)
-    b=to2d(tri.b)
-    c=to2d(tri.c)
+    d=to2d(tri.a)[1]
+    e=to2d(tri.b)[1]
+    f=to2d(tri.c)[1]
 
-    line_3d(a.x,a.y,a.z,b.x,b.y,b.z,[10,10],False)
-    line_3d(b.x,b.y,b.z,c.x,c.y,c.z,[10,10],False)
-    line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[10,10],False)
+    l1 = vector3d(0,0,0)
+    l1.x  = e.x - d.x
+    l1.y  = e.y - d.y
+    l1.z  = e.z - d.z
 
-    centeroid = intvector2d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3))
+    l2 = vector3d(0,0,0)
+    l2.x  = f.x - d.x
+    l2.y  = f.y - d.y
+    l2.z  = f.z - d.z
+
+    normal = vector3d(0,0,0)
+    normal.x = l1.y*l2.z-l1.z*l2.y
+    normal.y = l1.z*l2.x-l1.x*l2.z
+    normal.z = l1.x*l2.y-l1.y*l2.x
+    
+    centeroid = vector3d(round((a.x+b.x+c.x)/3),round((a.y+b.y+c.y)/3),round((a.z+b.z+c.z)/3))
+    
+    newtri = triangle(a,b,c)
+    
     n = np.array([normal.x,normal.y,normal.z])
     l = np.array([light.x,light.y,light.z])
+    d = np.array([d.x-camera.x,d.y-camera.y,d.z-camera.z])
+    
     n = n/np.linalg.norm(n)
     l = l/np.linalg.norm(l)
-    intensity=round(n.dot(l)*68)
-    if(intensity<0):
-        intensity = 68
-    if(fillkey):
-        #fillmesh(tri,centeroid[10,10],[10,10],intensity,False)
-        intensity=1
+    d = d/np.linalg.norm(d)
+    if(n[0]*d[0]+n[1]*d[1]+n[2]*d[2]<0):
+        #line_3d(a.x,a.y,a.z,b.x,b.y,b.z,[10,10],False)
+        #line_3d(b.x,b.y,b.z,c.x,c.y,c.z,[10,10],False)
+        #line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[10,10],False)
+        intensity=round((n.dot(l)+1)*34)
+        if(fillkey):
+            fillmesh(newtri,centeroid,[10,10],intensity,False)
     if(key):
         draw()
-    
-def to2d(i,f=0.005):
-    w=width()
-    h=height()
-    p = np.array([i.x,i.y,i.z,1])
-    q = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,f],[0,0,0,1]])
-    r = p.dot(q) 
-    x=r[0]/r[3]
-    y=r[1]/r[3]
-    z=r[2]/r[3]
-    o = vector3d(x,y,z)
-    return o
+    return 
+   
+def to2d(ii,near=0.1,far=1000,angle=math.pi/2):
+    a = aspect()
+    i = vector3d(0,0,0)
+    i.x = ii.x
+    i.y = ii.y
+    i.z = ii.z+2
+    f = 1/math.tan(angle/2)
+    q = far/(far-near)
+    o = vector3d(0,0,0)
+    w = i.z
+    o.x = a*f*i.x
+    o.y = f*i.y
+    o.z = (i.z*q-near*q)
+    if(w!=0):
+        o.x /= w
+        o.y /= w
+        o.z /= w
+    o.x = (o.x+1)*0.5*(width()-1)
+    o.y = (o.y+1)*0.5*(height()-1)
+    return [o,i]
 
 def rx(a,p):
-    o=p
+    o=vector3d(0,0,0)
+    o.x=p.x
     o.y=p.y*math.cos(a)-p.z*math.sin(a)
     o.z=p.y*math.sin(a)+p.z*math.cos(a)
     return o
 def ry(a,p):
-    o=p
+    o=vector3d(0,0,0)
     o.x=p.x*math.cos(a)+p.z*math.sin(a)
+    o.y=p.y
     o.z=-p.x*math.sin(a)+p.z*math.cos(a)
     return o
 def rz(a,p):
-    o=p
+    o=vector3d(0,0,0)
     o.x=p.x*math.cos(a)-p.y*math.sin(a)
     o.y=p.x*math.sin(a)+p.y*math.cos(a)
+    o.z=p.z
     return o
 
-def normal(p1,p2,p3,up=True):
-    np1=vector3d(0,0,0)
-    np1.x=p2.x-p1.x
-    np1.y=p2.y-p1.y
-    np1.z=p2.z-p1.z
-    np2=vector3d(0,0,0)
-    np2.x=p3.x-p1.x
-    np2.y=p3.y-p1.y
-    np2.z=p3.z-p1.z
-    a = np.array([np1.x,np1.y,np1.z])
-    b = np.array([np2.x,np2.y,np2.z])
-    c = np.cross(a, b)
-    nor = 1 if up else -1
-    len = 1/math.sqrt(c[0]*c[0]+c[1]*c[1]+c[2]*c[2])*nor
-    op = vector3d(0,0,0)
-    op.x=c[0]*len
-    op.y=c[1]*len
-    op.z=c[2]*len
-    return op
+
+
+def fillmesh(tri,centeroid,fillc,intensity,key=False):
+    space = []
+    rows, cols = (width(),height())
+    for i in range(cols): 
+        col = [] 
+        for j in range(rows): 
+            col.append(0) 
+        space.append(col)
+    points=[]
+    points.extend(lineforfill(round(tri.a.x),round(tri.a.y),round(tri.b.x),round(tri.b.y)))
+    points.extend(lineforfill(round(tri.b.x),round(tri.b.y),round(tri.c.x),round(tri.c.y)))
+    points.extend(lineforfill(round(tri.c.x),round(tri.c.y),round(tri.a.x),round(tri.a.y)))
+    for item in points:
+        if(item[0]<width() and item[1]<height() and item[0]>=0 and item[1]>=0):
+            space[item[0]][item[1]]=1
+    x = round(centeroid.x)
+    y = round(centeroid.y)
+    floodFill(space,width(),height(),x,y,0,1)
+    for i in range(cols): 
+        for j in range(rows): 
+            if(space[i][j]==1):
+                point(i,j,fillc,intensity)
+    if(key):
+        draw()
+        
+
+
+def lineforfill(x1,y1,x2,y2):
+    points = []
+    #finding change in x and y
+    dx = x2-x1
+    dy = y2-y1
+    #setting the starting points
+    x = x1
+    y = y1
+    #computing which direction has grater number of steps and and how many
+    steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
+    #dividing the change by steps to increase then on every iteration
+    if(steps>0):
+        Xinc = dx/steps
+        Yinc = dy/steps
+        #increasing that much every steps for all the steps
+        for i in range(steps+1):
+            points.append([round(x),round(y)])
+            x = x+Xinc
+            y = y+Yinc
+    return points
+
+
+
+
+def isValid(screen, m, n, x, y, prevC, newC):
+    if (x<0 or x>= m or y<0 or y>= n or screen[x][y]!= prevC or screen[x][y]== newC):
+        return False
+    return True
+def floodFill(screen,m, n, x, y, prevC, newC):
+    queue = []
+    if(isValid(screen,m,n,x,y,prevC,newC)):
+        queue.append([x, y])
+        screen[x][y] = newC
+    while queue:
+        currPixel = queue.pop()
+        posX = currPixel[0]
+        posY = currPixel[1]
+        if isValid(screen, m, n,posX + 1, posY,prevC, newC):
+            screen[posX + 1][posY] = newC
+            queue.append([posX + 1, posY])
+        if isValid(screen, m, n,posX-1, posY,  prevC, newC):
+            screen[posX-1][posY]= newC
+            queue.append([posX-1, posY])
+        if isValid(screen, m, n,posX, posY + 1,prevC, newC):
+            screen[posX][posY + 1]= newC
+            queue.append([posX, posY + 1])
+        if isValid(screen, m, n,  posX, posY-1,prevC, newC):
+            screen[posX][posY-1]= newC
+            queue.append([posX, posY-1])
+    filled = True
+    for i in range(len(screen)):
+        for j in range(len(screen[i])):
+            if(screen[i][j]==prevC):
+                filled = False
+    if(filled):
+        for i in range(len(screen)):
+            for j in range(len(screen[i])):
+                screen[i][j]=prevC
