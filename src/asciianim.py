@@ -20,7 +20,6 @@ import sys
 import os
 import math
 import cursor
-from numpy.lib.npyio import zipfile_factory
 import pyautogui
 import re
 import numpy as np
@@ -464,6 +463,20 @@ class triangle:
 @dataclass
 class mesh:
     k:list[triangle]
+
+@dataclass
+class index:
+    a:int
+    b:int
+    c:int
+
+@dataclass
+class obj:
+    p:list[vector3d]
+    i:list[index]
+
+
+
 def dprin(p,e=" "):
     print([round(p.x,2),round(p.y,2),round(p.z,2)],end=e)
 def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
@@ -491,7 +504,26 @@ def line_3d(x1,y1,z1,x2,y2,z2,color=[0,0],key=True):
     #if we dont wanna draw the the line as soon as it computes the points
     if(key):
         draw()
-def triangle_3d(tri,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+
+def avgz(tri):
+    return (tri.a.z+tri.a.z+tri.a.z)/3
+
+def sortmesh(m):
+    for i in range(0,len(m.k)):
+        for j in range(i+1,len(m.k)):
+            tri1 = m.k[i]
+            tri2 = m.k[j]
+            if(avgz(tri1)<avgz(tri2)):
+                temp = m.k[i]  
+                m.k[i] = m.k[j]   
+                m.k[j] = temp
+
+def drawmesh(m,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+    for i in range(len(m.k)):
+        tri = m.k[i]
+        triangle_3d(tri,showmesh,fillkey,key,light,camera)
+
+def triangle_3d(tri,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     a=to2d(tri.a)[0]
     b=to2d(tri.b)[0]
     c=to2d(tri.c)[0]
@@ -527,12 +559,13 @@ def triangle_3d(tri,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=v
     l = l/np.linalg.norm(l)
     d = d/np.linalg.norm(d)
     if(n[0]*d[0]+n[1]*d[1]+n[2]*d[2]<0):
-        #line_3d(a.x,a.y,a.z,b.x,b.y,b.z,[10,10],False)
-        #line_3d(b.x,b.y,b.z,c.x,c.y,c.z,[10,10],False)
-        #line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[10,10],False)
         intensity=round((n.dot(l)+1)*34)
         if(fillkey):
             fillmesh(newtri,centeroid,[10,10],intensity,False)
+        if(showmesh):
+            line_3d(a.x,a.y,a.z,b.x,b.y,b.z,[3,3],False)
+            line_3d(b.x,b.y,b.z,c.x,c.y,c.z,[3,3],False)
+            line_3d(a.x,a.y,a.z,c.x,c.y,c.z,[3,3],False)
     if(key):
         draw()
     return 
@@ -593,14 +626,16 @@ def fillmesh(tri,centeroid,fillc,intensity,key=False):
     points.extend(lineforfill(round(tri.c.x),round(tri.c.y),round(tri.a.x),round(tri.a.y)))
     for item in points:
         if(item[0]<width() and item[1]<height() and item[0]>=0 and item[1]>=0):
-            space[item[0]][item[1]]=1
+            space[item[1]][item[0]]=1
+
     x = round(centeroid.x)
     y = round(centeroid.y)
+
     floodFill(space,width(),height(),x,y,0,1)
     for i in range(cols): 
         for j in range(rows): 
             if(space[i][j]==1):
-                point(i,j,fillc,intensity)
+                point(j,i,fillc,intensity)
     if(key):
         draw()
         
@@ -608,19 +643,14 @@ def fillmesh(tri,centeroid,fillc,intensity,key=False):
 
 def lineforfill(x1,y1,x2,y2):
     points = []
-    #finding change in x and y
     dx = x2-x1
     dy = y2-y1
-    #setting the starting points
     x = x1
     y = y1
-    #computing which direction has grater number of steps and and how many
     steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
-    #dividing the change by steps to increase then on every iteration
     if(steps>0):
         Xinc = dx/steps
         Yinc = dy/steps
-        #increasing that much every steps for all the steps
         for i in range(steps+1):
             points.append([round(x),round(y)])
             x = x+Xinc
@@ -631,29 +661,32 @@ def lineforfill(x1,y1,x2,y2):
 
 
 def isValid(screen, m, n, x, y, prevC, newC):
-    if (x<0 or x>= m or y<0 or y>= n or screen[x][y]!= prevC or screen[x][y]== newC):
+    if (x<0 or x>= m or y<0 or y>= n):
+        return False
+    if(screen[y][x]!= prevC or screen[y][x]== newC):
         return False
     return True
+
 def floodFill(screen,m, n, x, y, prevC, newC):
     queue = []
     if(isValid(screen,m,n,x,y,prevC,newC)):
         queue.append([x, y])
-        screen[x][y] = newC
+        screen[y][x] = newC
     while queue:
         currPixel = queue.pop()
         posX = currPixel[0]
         posY = currPixel[1]
         if isValid(screen, m, n,posX + 1, posY,prevC, newC):
-            screen[posX + 1][posY] = newC
+            screen[posY][posX+1] = newC
             queue.append([posX + 1, posY])
         if isValid(screen, m, n,posX-1, posY,  prevC, newC):
-            screen[posX-1][posY]= newC
+            screen[posY][posX-1]= newC
             queue.append([posX-1, posY])
         if isValid(screen, m, n,posX, posY + 1,prevC, newC):
-            screen[posX][posY + 1]= newC
+            screen[posY + 1][posX]= newC
             queue.append([posX, posY + 1])
         if isValid(screen, m, n,  posX, posY-1,prevC, newC):
-            screen[posX][posY-1]= newC
+            screen[posY-1][posX]= newC
             queue.append([posX, posY-1])
     filled = True
     for i in range(len(screen)):
@@ -664,3 +697,50 @@ def floodFill(screen,m, n, x, y, prevC, newC):
         for i in range(len(screen)):
             for j in range(len(screen[i])):
                 screen[i][j]=prevC
+
+def rxa(a,p):
+    for i in range(len(p)):
+        p[i]=rx(a,p[i])
+def rya(a,p):
+    for i in range(len(p)):
+        p[i]=ry(a,p[i])
+def rza(a,p):
+    for i in range(len(p)):
+        p[i]=rz(a,p[i])
+
+
+def Draw_Object(obj,showmesh = True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+    me=[]
+    for j in range(len(obj.i)):
+        tri = triangle(obj.p[obj.i[j].a],obj.p[obj.i[j].b],obj.p[obj.i[j].c])
+        me.append(tri)
+    m = mesh(me)
+    sortmesh(m)
+    drawmesh(m,showmesh,fillkey,key,light,camera)
+
+
+def import_obj(filename):
+    id = []
+    points = []
+    indexes = []
+    with open(filename,"r") as fi:
+        for ln in fi:
+            if ln.startswith("v"):
+                id.append(ln[2:-1])
+    for i in id:
+        arr = i.split(" ")
+        arr = [float(numeric_string) for numeric_string in arr]
+        p = vector3d(arr[0],arr[1],arr[2])
+        points.append(p)
+    id=[]
+    with open(filename,"r") as fi:
+        for ln in fi:
+            if ln.startswith("f"):
+                id.append(ln[2:-1])
+    for i in id:
+        arr = i.split(" ")
+        arr = [int(numeric_string) for numeric_string in arr]
+        p = index(arr[0]-1,arr[1]-1,arr[2]-1)
+        indexes.append(p)
+    object_0 = obj(points,indexes)
+    return object_0
