@@ -26,7 +26,7 @@ import numpy as np
 from dataclasses import dataclass
 
 sys.setrecursionlimit(1600)
-
+np.seterr(divide='ignore', invalid='ignore')
 #a function to clear output after every frame using lambda to map cls from os into clear
 clear = lambda:os.system('cls')
 
@@ -47,7 +47,7 @@ def aspect():
 #----------------------------------------------------------------------#
 
 #function to create a canvas
-def createcanvas(width=240,height=135,fullscreen=False):
+def createcanvas(width=round(pyautogui.size()[0]/8),height=round(pyautogui.size()[1]/8),fullscreen=True):
     os.system('mode con: cols='+str(int(width))+' lines='+str(int(height)))
     #making it full screen
     if(fullscreen):
@@ -153,6 +153,8 @@ def line_2d(x1,y1,x2,y2,color=[0,0],intensity=0,key=True):
     y = y1
     #computing which direction has grater number of steps and and how many
     steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
+    if(steps>math.sqrt(width()*width()+height()*height())):
+        steps = round(math.sqrt(width()*width()+height()*height()))
     #dividing the change by steps to increase then on every iteration
     if(steps>0):
         Xinc = dx/steps
@@ -276,7 +278,7 @@ def scale_2d(s,color=[0,0],intensity=0,key=True):
 #----------------------------------------------------------------------#
 #extracts the point transforms the points and adds them to the matrix
 #----------------------------------------------------------------------#
-def transform_2d(x,y,color,intensity=0,key=True):
+def transform_2d(x,y,color=[0,0],intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
@@ -288,7 +290,7 @@ def transform_2d(x,y,color,intensity=0,key=True):
 #----------------------------------------------------------------------#
 #extracts the point rotates in the xy plane adds points back
 #----------------------------------------------------------------------#
-def rotate_at_2d(x,y,a,color,intensity=0,key=True):
+def rotate_at_2d(x,y,a,color=[0,0],intensity=0,key=True):
     points = extract()
     clearbg()
     for j in points:
@@ -391,7 +393,7 @@ def is_valid(x,y,pc,nc):
             return False
     return True
 
-def fill(x,y,Nc,fillc,intensity=0,key=True,Pc=[0,0]):
+def fill(x,y,Nc,fillc=[0,0],intensity=0,key=True,Pc=[0,0]):
     pc = Pc[0]*16+Pc[1]
     nc = Nc[0]*16+Nc[1]
 
@@ -500,13 +502,13 @@ def dprin(p,e=" "):
 #----------------------------------------------------------------------#
 #convert a point from 3d to 2d    
 #----------------------------------------------------------------------#   
-def to2d(ii,near=0.1,far=1000,angle=math.pi/2):
+def to2d(ii,at = 8,near=0.1,far=1000,angle=math.pi/2):
     a = aspect()
     #transling away from us in z axis
     i = vector3d(0,0,0)
     i.x = ii.x
     i.y = ii.y
-    i.z = ii.z+2
+    i.z = ii.z+at
     #projection matrix
     f = 1/math.tan(angle/2)
     q = far/(far-near)
@@ -571,6 +573,8 @@ def lineforfill(x1,y1,x2,y2):
     x = x1
     y = y1
     steps  = round(abs(dx) if(abs(dx)>abs(dy)) else abs(dy))
+    if(steps>math.sqrt(width()*width()+height()*height())):
+        steps = round(math.sqrt(width()*width()+height()*height()))
     if(steps>0):
         Xinc = dx/steps
         Yinc = dy/steps
@@ -627,14 +631,14 @@ def floodFill(screen,m, n, x, y, prevC, newC):
 #----------------------------------------------------------------------#
 #draw a mesh
 #----------------------------------------------------------------------#
-def triangle_3d(tri,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def triangle_3d(tri,at,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     #we convert the 3d triangle into 2d triangle
-    a=to2d(tri.a)[0]
-    b=to2d(tri.b)[0]
-    c=to2d(tri.c)[0]
-    d=to2d(tri.a)[1]
-    e=to2d(tri.b)[1]
-    f=to2d(tri.c)[1]
+    a=to2d(tri.a,at)[0]
+    b=to2d(tri.b,at)[0]
+    c=to2d(tri.c,at)[0]
+    d=to2d(tri.a,at)[1]
+    e=to2d(tri.b,at)[1]
+    f=to2d(tri.c,at)[1]
 
     #calculating normal
     l1 = vector3d(0,0,0)
@@ -703,24 +707,24 @@ def sortmesh(m):
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
-def drawmesh(m,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def drawmesh(m,at=8,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     for i in range(len(m.k)):
         tri = m.k[i]
-        triangle_3d(tri,showmesh,fillkey,key,light,camera)
+        triangle_3d(tri,at,showmesh,fillkey,key,light,camera)
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #draw an entire object
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
-def Draw_Object(obj,showmesh = True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def Draw_Object(obj,at=8,showmesh = True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     me=[]
     for j in range(len(obj.i)):
         tri = triangle(obj.p[obj.i[j].a],obj.p[obj.i[j].b],obj.p[obj.i[j].c])
         me.append(tri)
     m = mesh(me)
     sortmesh(m)
-    drawmesh(m,showmesh,fillkey,key,light,camera)
+    drawmesh(m,at,showmesh,fillkey,key,light,camera)
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#

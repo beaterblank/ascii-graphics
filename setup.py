@@ -16,11 +16,19 @@ setup(
   install_requires = [
     "cursor",
     "pyautogui",
-    "keyboard",
+    "numpy",
+    "math",
+    "sys",
+    "os",
+    "re",
+    "dataclasses"
   ],
   extras_require = {
     "dev": [
       "pytest>=3.7",
     ]
   },
+  url="https://github.com/beaterblank/ascii-graphics",
+  author = "G.Mohan teja",
+  author_email="mohanteja.g2019@vitstudent.ac.in",
   )

@@ -1,0 +1,6 @@
+include *.cmd
+include *.txt
+recursive-include images *.png
+recursive-include test *.obj
+recursive-include test *.py
+recursive-include test *.txt
