@@ -1,11 +1,12 @@
 import asciianim as a
-a.createcanvas()
+a.createcanvas(100,100,False)
 obj = a.import_obj("VideoShip.obj")
 while True:
     p = obj.p
-    a.rza(0.03,p)
+    a.rya(0.3,p)
+    a.rxa(0.3,p)
     obj.p = p
-    a.Draw_Object(obj,2,True,False)
+    a.Draw_Object(obj,6,True,True)
     a.draw()
     a.clearbg()
 

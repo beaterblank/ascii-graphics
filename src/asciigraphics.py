@@ -631,7 +631,7 @@ def floodFill(screen,m, n, x, y, prevC, newC):
 #----------------------------------------------------------------------#
 #draw a mesh
 #----------------------------------------------------------------------#
-def triangle_3d(tri,at,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def triangle_3d(tri,at,showmesh=True,fillkey=False,mc=[1,1],fc=[10,10],key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     #we convert the 3d triangle into 2d triangle
     a=to2d(tri.a,at)[0]
     b=to2d(tri.b,at)[0]
@@ -669,11 +669,11 @@ def triangle_3d(tri,at,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,
     if(n[0]*d[0]+n[1]*d[1]+n[2]*d[2]<0):
         intensity=round((n.dot(l)+1)*34)
         if(fillkey):
-            fillmesh(newtri,centeroid,[10,10],intensity,False)
+            fillmesh(newtri,centeroid,fc,intensity,False)
         if(showmesh):
-            line_2d(a.x,a.y,b.x,b.y,[3,3],0,False)
-            line_2d(b.x,b.y,c.x,c.y,[3,3],0,False)
-            line_2d(a.x,a.y,c.x,c.y,[3,3],0,False)
+            line_2d(a.x,a.y,b.x,b.y,mc,0,False)
+            line_2d(b.x,b.y,c.x,c.y,mc,0,False)
+            line_2d(a.x,a.y,c.x,c.y,mc,0,False)
     if(key):
         draw()
     return 
@@ -707,24 +707,24 @@ def sortmesh(m):
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
-def drawmesh(m,at=8,showmesh=True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def drawmesh(m,at=8,showmesh=True,fillkey=False,mc=[1,1],fc=[10,10],key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     for i in range(len(m.k)):
         tri = m.k[i]
-        triangle_3d(tri,at,showmesh,fillkey,key,light,camera)
+        triangle_3d(tri,at,showmesh,fillkey,mc,fc,key,light,camera)
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#
 #draw an entire object
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
-def Draw_Object(obj,at=8,showmesh = True,fillkey=False,key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
+def Draw_Object(obj,at=8,showmesh = True,fillkey=False,mc=[1,1],fc=[10,10],key=False,light=vector3d(0.5,0.5,0.5),camera=vector3d(0,0,0)):
     me=[]
     for j in range(len(obj.i)):
         tri = triangle(obj.p[obj.i[j].a],obj.p[obj.i[j].b],obj.p[obj.i[j].c])
         me.append(tri)
     m = mesh(me)
     sortmesh(m)
-    drawmesh(m,at,showmesh,fillkey,key,light,camera)
+    drawmesh(m,at,showmesh,fillkey,mc,fc,key,light,camera)
 #----------------------------------------------------------------------#
 
 #----------------------------------------------------------------------#

@@ -1,30 +1,12 @@
 # ascii-graphics
 
-
-__Note__ to check the code goto [src/asciianim.py](src/asciianim.py) on running code goes into full screen u can get out of the full screen by pressing f11
-
-__this is only available for windows operating systems right now__
-(best used on windows 10)(could work on other operating systems -   not tested)
-
-we need to configure our command prompt to show us square texts or else
- program will give us a wroped in y direction result to do this 
-*__open command prompt__
-*__right click on top and goto defaults__(as shown below)
-
-![right_click_image](/images/click.png)
-
-*__goto fonts and select _Raster Fonts_ and of font size 8*8 and save it__ (as shown below)(take a note of your previous settings cause its highly probabable that you wont like this font)
-
-![fontsize](/images/size.png)
-
-
 install the software by using
-__python -m pip install asciigraphics__ or in some systems
+__python -m pip install asciigraphics__ or
 __py -m pip install asciigraphics__ or 
 __pip install asciigraphics__ 
 
 
-# Usage :
+## Usage :
 
 __Note:__
 __*variable*__ implies it has a default vaule
@@ -42,7 +24,7 @@ __a.createcanvas(*width,height,bool_fullscreen*)__
 __a.draw()__  updates the screen
 __a.clearbg()__ clear the screen
 
-## 2d start
+### 2d
 
 __a.point(x,y,*color,intensity*)__ places a point with given color and intensity at a given position
 
@@ -69,9 +51,8 @@ __a.fill(x,y,Nc,*fillc,intensity,key,Pc*)__ Nc is boder color and fillc is the f
 
 __a.text(x,y,string,*color,key*)__ puts a text at given location with warping
 
-## 2d end
 
-## 3d start
+### 3d
 
 make a 3d object in blender export it as an obj file and while exporting only tick the option triangulate faces and untick anything else to make sure this can import it 
 
@@ -105,8 +86,6 @@ __obj.p = p__
 
 this will rotate points by a given angle
 
-
-## 3d end
 
 
 
