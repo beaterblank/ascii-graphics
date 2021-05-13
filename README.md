@@ -1,7 +1,20 @@
 # ascii-graphics
 
+
+__Note__ to check the code goto [src/asciianim.py](src/asciianim.py) on running code goes into full screen u can get out of the full screen by pressing f11
+
+__this is only available for windows operating systems right now__
+(best used on windows 10)(could work on other operating systems -   not tested)
+
+we need to configure our command prompt to show us square texts or else
+program will give us a wroped in y direction result to do this 
+*__open command prompt__
+*__right click on top and goto defaults__
+*__goto fonts and select _Raster Fonts_ and of font size 8*8 and save it__ 
+(take a note of your previous settings cause its highly probabable that you wont like this font
+
 install the software by using
-__python -m pip install asciigraphics__ or
+__python -m pip install asciigraphics__ or in some systems
 __py -m pip install asciigraphics__ or 
 __pip install asciigraphics__ 
 
