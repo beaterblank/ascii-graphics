@@ -12,6 +12,7 @@ setup(
   classifiers = [
     "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
     "Operating System :: Microsoft :: Windows :: Windows 10 ",
+    "Programming Language :: Python :: 3.9",
   ],
   long_description = long_description,
   long_description_content_type = "text/markdown",
